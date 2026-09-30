@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 // EDIT NAV LINKS HERE
 const navigation = [
   { name: 'HOME', id: 'hero' },
-  { name: 'ABOUT', id: 'about' },
   { name: 'PROJECTS', id: 'projects' },
   { name: 'CONTACT', id: 'contact' },
 ]

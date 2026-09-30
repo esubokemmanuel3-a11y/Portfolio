@@ -10,8 +10,8 @@ const projects = [
     icon: LineChart,
     status: 'In Development',
     // EDIT LINKS HERE once you have them — leave blank to hide that button
-    link: 'ss',
-    github: 'ss',
+    link: '',
+    github: '',
   },
   {
     title: 'Telegram-to-MT5 Signal Copier',
@@ -41,7 +41,7 @@ const statusColor = {
 
 export default function Projects() {
   return (
-    <section id="projects" className="relative px-6 py-24 bg-black sm:py-32 sm:px-8">
+    <section id="projects" className="relative px-6 py-24 scroll-mt-24 bg-black sm:py-32 sm:px-8">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <pre className="hidden md:block absolute text-xs top-24 right-12 text-white/10" style={{ fontFamily: 'monospace' }}>
 {`const projects = [
@@ -68,9 +68,13 @@ export default function Projects() {
               $ cd ~/projects
             </span>
           </div>
-          <h2 className="mb-6 text-4xl font-bold text-white sm:text-5xl lg:text-6xl" style={{ fontFamily: 'Special Elite, monospace' }}>
+          <h2 className="mb-3 text-4xl font-bold text-white sm:text-5xl lg:text-6xl" style={{ fontFamily: 'Special Elite, monospace' }}>
             Selected <span className="text-green-400">Work</span>
           </h2>
+          {/* EDIT ROLE LINE HERE */}
+          <p className="mb-4 text-sm tracking-widest uppercase text-white/40" style={{ fontFamily: 'monospace' }}>
+            Software Engineering Student · Python & MQL5 Developer
+          </p>
           {/* EDIT SUBTEXT HERE */}
           <p className="max-w-3xl pl-4 text-lg border-l-2 border-green-400 text-white/60" style={{ fontFamily: 'Special Elite, monospace' }}>
             <span className="text-sm text-green-400">// Portfolio Overview</span><br />

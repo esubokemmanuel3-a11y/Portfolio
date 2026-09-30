@@ -18,15 +18,15 @@ const LinkedinIcon = (props) => (
 // EDIT DIRECT CONTACT HERE — leave phone blank to hide that card until you're ready
 const directContact = {
   email: 'youremail@example.com',
-  phone: '+23481376664962', // e.g. '+234 91393 XXXX'
+  phone: '', // e.g. '+234 91393 XXXX'
 }
 
 // EDIT CONTACT LINKS HERE — leave url blank to hide that card until you're ready
 const socialLinks = [
   { name: 'GitHub', url: 'https://github.com/esubokemmanuel3-a11y', icon: GithubIcon, external: true },
-  { name: 'LinkedIn', url: 'w', icon: LinkedinIcon, external: true },
+  { name: 'LinkedIn', url: '', icon: LinkedinIcon, external: true },
   { name: 'Telegram', url: 'https://t.me/PzKBM', icon: Send, external: true },
-  { name: 'Fiverr', url: 'sfs', icon: Briefcase, external: true },
+  { name: 'Fiverr', url: '', icon: Briefcase, external: true },
 ]
 
 const containerVariants = {
@@ -75,7 +75,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="relative flex items-center min-h-screen px-4 py-16 overflow-hidden bg-black sm:px-6 sm:py-20">
+    <section id="contact" className="relative flex items-center min-h-screen px-4 py-16 scroll-mt-24 overflow-hidden bg-black sm:px-6 sm:py-20">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <pre className="hidden md:block absolute text-xs top-20 left-12 text-white/10" style={{ fontFamily: 'monospace' }}>
 {`const contact = {
