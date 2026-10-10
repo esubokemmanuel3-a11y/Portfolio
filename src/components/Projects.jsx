@@ -1,8 +1,25 @@
-import { motion } from 'framer-motion'
-import { ArrowUpRight, Terminal, Bot, LineChart, Radio } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowUpRight, Terminal, Bot, LineChart, Radio, BookOpen, Maximize2, X } from 'lucide-react'
 
 // EDIT PROJECTS HERE — add/remove/edit as your work evolves
 const projects = [
+  {
+    title: 'Daily Devotional Journal',
+    // EDIT DESCRIPTION HERE — trim anything you didn't actually build in v2
+    description: "A daily devotional app built around Spurgeon's Morning and Evening. It shows the right entry for the time of day, lets you write and tag your own reflection for each one, and keeps a searchable timeline of everything you've written.",
+    // EDIT STACK HERE
+    tags: ['React', 'Supabase', 'Tailwind'],
+    icon: BookOpen,
+    // EDIT SCREENSHOTS HERE — drop images in the public/ folder and list their paths, e.g. ['/devotional-1.png', '/devotional-2.png'].
+    // One image = plain image. Two or more = slider with arrows. Empty = icon.
+    images: ['/devotion 1.jpeg', '/devotion 2.jpeg', '/devotion 3.jpeg'],
+    status: 'Live',
+    // EDIT LINKS HERE
+    link: 'https://devotion-journal.vercel.app/',
+    github: '',
+  },
   {
     title: 'MT5 Signal Backtester',
     description: 'A desktop app that backtests Telegram trading signals against real MT5 price history — balance-tier lot sizing, breakeven/trailing stops, and a full equity-curve dashboard.',
@@ -32,6 +49,250 @@ const projects = [
     github: '',
   },
 ]
+
+// Hover/press feel for the buttons inside the fullscreen viewer. (Card buttons scale with the card via group-hover:scale-125 in ProjectMedia.)
+const buttonMotion = {
+  whileHover: { scale: 1.3 },
+  whileTap: { scale: 0.9 },
+  transition: { type: 'spring', stiffness: 400, damping: 20 },
+}
+
+// Fullscreen viewer: click backdrop / X / press Esc to close, arrow keys or swipe to move between images.
+function Lightbox({ title, images, index, setIndex, onClose }) {
+  const total = images.length
+  const many = total > 1
+  const go = (dir) => setIndex((i) => (i + dir + total) % total)
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose()
+      if (many && e.key === 'ArrowRight') go(1)
+      if (many && e.key === 'ArrowLeft') go(-1)
+    }
+    window.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden' // stop the page scrolling behind the viewer
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [many, total])
+
+  // Rendered into <body> so it covers the whole screen, not just the project card
+  return createPortal(
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm sm:p-10"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${title} screenshots`}
+    >
+      <motion.button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        {...buttonMotion}
+        className="absolute z-10 flex items-center justify-center w-11 h-11 text-white transition-colors border top-4 right-4 bg-black/70 border-white/30 hover:bg-green-500 hover:border-green-500 hover:text-black"
+      >
+        <X className="w-5 h-5" />
+      </motion.button>
+
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.img
+          key={index}
+          src={images[index]}
+          alt={`${title} screenshot ${index + 1}`}
+          draggable={false}
+          onClick={(e) => e.stopPropagation()}
+          className="object-contain max-w-[95vw] max-h-[85vh] border border-white/20"
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          drag={many ? 'x' : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={(_, info) => {
+            if (info.offset.x < -50) go(1)
+            else if (info.offset.x > 50) go(-1)
+          }}
+        />
+      </AnimatePresence>
+
+      {many && (
+        <>
+          <motion.button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); go(-1) }}
+            aria-label="Previous image"
+            {...buttonMotion}
+            className="absolute z-10 flex items-center justify-center w-10 h-10 -mt-5 text-lg text-white transition-colors border left-3 sm:left-6 top-1/2 bg-black/70 border-white/30 hover:bg-green-500 hover:border-green-500 hover:text-black"
+            style={{ fontFamily: 'monospace' }}
+          >
+            {'<'}
+          </motion.button>
+          <motion.button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); go(1) }}
+            aria-label="Next image"
+            {...buttonMotion}
+            className="absolute z-10 flex items-center justify-center w-10 h-10 -mt-5 text-lg text-white transition-colors border right-3 sm:right-6 top-1/2 bg-black/70 border-white/30 hover:bg-green-500 hover:border-green-500 hover:text-black"
+            style={{ fontFamily: 'monospace' }}
+          >
+            {'>'}
+          </motion.button>
+          <span
+            className="absolute z-10 px-3 py-1 text-xs -translate-x-1/2 border bottom-4 left-1/2 bg-black/70 border-white/20 text-white/70"
+            style={{ fontFamily: 'monospace' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+          </span>
+        </>
+      )}
+    </motion.div>,
+    document.body
+  )
+}
+
+// Image slider for a project card: arrows, swipe, counter, click-to-fullscreen. Falls back to the icon when there are no images.
+function ProjectMedia({ title, images = [], Icon }) {
+  const [index, setIndex] = useState(0)
+  const [open, setOpen] = useState(false)
+  const total = images.length
+
+  if (total === 0) {
+    return (
+      <>
+        <Icon className="relative z-10 w-20 h-20 text-white" strokeWidth={1.5} />
+        <div className="absolute inset-0 transition-transform duration-500 translate-y-full bg-green-500 group-hover:translate-y-0" />
+        <Icon className="absolute inset-0 z-20 w-20 h-20 m-auto text-black transition-opacity duration-500 opacity-0 group-hover:opacity-100" strokeWidth={1.5} />
+      </>
+    )
+  }
+
+  const go = (dir) => setIndex((i) => (i + dir + total) % total)
+  const many = total > 1
+
+  return (
+    <div className="relative w-full h-full">
+      {/* Hover effect: dim + desaturated at rest, full colour + slow zoom on hover. EDIT the classes below to tune it. */}
+      <div
+        className="relative w-full h-full transition-all duration-700 cursor-zoom-in grayscale-50 brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-105"
+        onClick={(e) => { if (e.target === e.currentTarget) setOpen(true) }}
+      >
+        {/* Blurred copy of the screenshot fills the empty sides, so tall phone screenshots don't sit in a bare box */}
+        <img
+          src={images[index]}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="absolute inset-0 object-cover w-full h-full opacity-40 pointer-events-none scale-125 blur-2xl"
+        />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.img
+            key={index}
+            src={images[index]}
+            alt={`${title} screenshot ${index + 1}`}
+            draggable={false}
+            // EDIT FIT HERE: object-contain shows the whole screenshot. Change to object-cover to fill the frame (crops the edges).
+            className={`relative object-contain w-full h-full ${many ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onTap={() => setOpen(true)}
+            drag={many ? 'x' : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -50) go(1)
+              else if (info.offset.x > 50) go(-1)
+            }}
+          />
+        </AnimatePresence>
+      </div>
+
+      {/* CRT scanlines: visible at rest, fade out on hover */}
+      <div
+        className="absolute inset-0 z-10 transition-opacity duration-500 pointer-events-none group-hover:opacity-0"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 1px, transparent 1px, transparent 3px)' }}
+      />
+
+      {/* Green scan line: sweeps up the image on hover */}
+      <div className="absolute inset-x-0 z-10 h-0.5 bg-green-400 opacity-0 pointer-events-none -bottom-1 shadow-[0_0_20px_4px_rgba(74,222,128,0.8)] transition-all duration-700 ease-out group-hover:bottom-full group-hover:opacity-100" />
+
+      {/* Fullscreen button (clicking the image does the same) */}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="View fullscreen"
+        className="absolute z-30 flex items-center justify-center w-8 h-8 text-white transition-all duration-300 group-hover:scale-125 border top-2 right-2 bg-black/70 border-white/30 hover:bg-green-500 hover:border-green-500 hover:text-black"
+      >
+        <Maximize2 className="w-4 h-4" />
+      </button>
+
+      {many && (
+        <>
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Previous image"
+            className="absolute z-30 flex items-center justify-center w-8 h-8 -mt-4 text-white transition-all duration-300 group-hover:scale-125 border left-2 top-1/2 bg-black/70 border-white/30 hover:bg-green-500 hover:border-green-500 hover:text-black"
+            style={{ fontFamily: 'monospace' }}
+          >
+            {'<'}
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Next image"
+            className="absolute z-30 flex items-center justify-center w-8 h-8 -mt-4 text-white transition-all duration-300 group-hover:scale-125 border right-2 top-1/2 bg-black/70 border-white/30 hover:bg-green-500 hover:border-green-500 hover:text-black"
+            style={{ fontFamily: 'monospace' }}
+          >
+            {'>'}
+          </button>
+
+          <div className="absolute z-30 flex gap-1.5 bottom-3 left-3">
+            {images.map((_, i) => (
+              <button
+                type="button"
+                key={i}
+                onClick={() => setIndex(i)}
+                aria-label={`Go to image ${i + 1}`}
+                className={`w-2 h-2 border transition-colors ${i === index ? 'bg-green-400 border-green-400' : 'bg-black/70 border-white/40 hover:border-white'}`}
+              />
+            ))}
+          </div>
+
+          <span
+            className="absolute z-30 px-2 py-1 text-xs border bottom-2 right-2 bg-black/70 border-white/20 text-white/70"
+            style={{ fontFamily: 'monospace' }}
+          >
+            {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+          </span>
+        </>
+      )}
+
+      <AnimatePresence>
+        {open && (
+          <Lightbox
+            key="lightbox"
+            title={title}
+            images={images}
+            index={index}
+            setIndex={setIndex}
+            onClose={() => setOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 const statusColor = {
   Live: 'text-green-400 border-green-500/30 bg-green-500/10',
@@ -98,9 +359,7 @@ export default function Projects() {
               >
                 <div className="p-6 transition-all duration-300 bg-black border border-white/10 hover:border-green-400/50">
                   <div className="mb-6 w-full aspect-[4/3] border border-white/20 bg-white/5 flex items-center justify-center relative overflow-hidden">
-                    <Icon className="relative z-10 w-20 h-20 text-white" strokeWidth={1.5} />
-                    <div className="absolute inset-0 transition-transform duration-500 translate-y-full bg-green-500 group-hover:translate-y-0" />
-                    <Icon className="absolute inset-0 z-20 w-20 h-20 m-auto text-black transition-opacity duration-500 opacity-0 group-hover:opacity-100" strokeWidth={1.5} />
+                    <ProjectMedia title={project.title} images={project.images} Icon={Icon} />
                   </div>
 
                   <div className="space-y-4">
